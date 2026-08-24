@@ -46,22 +46,52 @@ function rowToTip(row){
   return { name: row.name, heim: row.heim, gast: row.gast, spezial: row.spezial || {}, submittedAt: row.submitted_at };
 }
 
-/* ---------- login (name + password, kein echtes Auth-System) ---------- */
-async function checkPlayerLogin(name, password){
+/* ---------- login (name + Merkwort, kein echtes Auth-System) ---------- */
+async function sha256Hex(text){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function loginPlayer(name, password){
+  const hash = await sha256Hex(password);
   const { data, error } = await supabaseClient.from('players').select('*').eq('name', name).maybeSingle();
   if(error) return { ok:false, error:'Verbindungsfehler, bitte nochmal versuchen' };
-  if(!data){
-    const { error: insErr } = await supabaseClient.from('players').insert({ name, password });
-    if(insErr) return { ok:false, error:'Registrierung fehlgeschlagen' };
-    return { ok:true };
-  }
-  if(data.password !== password){
-    return { ok:false, error:'Falsches Passwort' };
-  }
+  if(!data) return { ok:false, error:'Diesen Namen gibt’s noch nicht — Account erstellen' };
+  if(data.password !== hash) return { ok:false, error:'Falsches Merkwort' };
   return { ok:true };
 }
 
+async function registerPlayer(name, password){
+  const { data: existing, error: selErr } = await supabaseClient.from('players').select('name').eq('name', name).maybeSingle();
+  if(selErr) return { ok:false, error:'Verbindungsfehler, bitte nochmal versuchen' };
+  if(existing) return { ok:false, error:'Name bereits vergeben — bitte einloggen' };
+  const hash = await sha256Hex(password);
+  const { error: insErr } = await supabaseClient.from('players').insert({ name, password: hash });
+  if(insErr) return { ok:false, error:'Registrierung fehlgeschlagen' };
+  return { ok:true };
+}
+
+let loginMode = 'login';
+function setLoginMode(mode){
+  loginMode = mode;
+  $('#loginTabLogin').classList.toggle('active', mode === 'login');
+  $('#loginTabRegister').classList.toggle('active', mode === 'register');
+  $('#loginError').style.display = 'none';
+  if(mode === 'login'){
+    $('#loginBtn').textContent = 'Einloggen';
+    $('#loginHint').textContent = 'Melde dich mit Namen und Merkwort an.';
+    $('#loginPassword').autocomplete = 'current-password';
+  } else {
+    $('#loginBtn').textContent = 'Account erstellen';
+    $('#loginHint').textContent = 'Neuer Name + frei gewähltes Merkwort. Kein echtes Passwort verwenden!';
+    $('#loginPassword').autocomplete = 'new-password';
+  }
+}
+$('#loginTabLogin').addEventListener('click', ()=>setLoginMode('login'));
+$('#loginTabRegister').addEventListener('click', ()=>setLoginMode('register'));
+
 function showLoginOverlay(){
+  setLoginMode('login');
   $('#loginOverlay').classList.remove('hidden');
   $('#loginName').focus();
 }
@@ -87,11 +117,11 @@ async function attemptLogin(){
   const errEl = $('#loginError');
   errEl.style.display = 'none';
   if(!name || !password){
-    errEl.textContent = 'Name und Passwort ausfüllen';
+    errEl.textContent = 'Name und Merkwort ausfüllen';
     errEl.style.display = 'block';
     return;
   }
-  const result = await checkPlayerLogin(name, password);
+  const result = loginMode === 'login' ? await loginPlayer(name, password) : await registerPlayer(name, password);
   if(!result.ok){
     errEl.textContent = result.error;
     errEl.style.display = 'block';
@@ -108,7 +138,7 @@ async function ensureUsername(){
   const savedName = localStorage.getItem('tippspiel_username');
   const savedPassword = localStorage.getItem('tippspiel_password');
   if(savedName && savedPassword){
-    const result = await checkPlayerLogin(savedName, savedPassword);
+    const result = await loginPlayer(savedName, savedPassword);
     if(result.ok){
       completeLogin(savedName, savedPassword, false);
       return;
@@ -493,9 +523,9 @@ let adminUnlocked = false;
 $$('nav.tabs button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     if(btn.dataset.tab === 'admin' && !adminUnlocked){
-      const pw = window.prompt('Admin-Passwort:');
+      const pw = window.prompt('Admin-Merkwort:');
       if(pw === null) return;
-      if(pw !== ADMIN_PASSWORD){ showToast('Falsches Passwort'); return; }
+      if(pw !== ADMIN_PASSWORD){ showToast('Falsches Merkwort'); return; }
       adminUnlocked = true;
     }
     $$('nav.tabs button').forEach(b=>b.classList.remove('active'));

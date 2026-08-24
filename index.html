@@ -301,6 +301,20 @@
     color:var(--red); font-size:12px; margin-bottom:10px; text-align:center;
   }
   .login-box .btn{width:100%; margin-top:4px;}
+  .login-tabs{
+    display:flex; gap:0; margin-bottom:18px;
+    border-bottom:1px solid var(--line);
+  }
+  .login-tabs button{
+    flex:1; background:none; border:none;
+    color:var(--chalk-dim);
+    font-family:'Teko',sans-serif; font-size:17px; letter-spacing:0.5px;
+    padding:8px 4px 10px; cursor:pointer;
+    border-bottom:3px solid transparent;
+    transition:color .15s, border-color .15s;
+  }
+  .login-tabs button.active{color:var(--amber); border-color:var(--amber);}
+  .login-tabs button:hover{color:var(--chalk);}
 </style>
 </head>
 <body>
@@ -308,18 +322,21 @@
 <div class="login-overlay hidden" id="loginOverlay">
   <div class="login-box">
     <h2>SC EMMEN 3 <span class="accent">TIPPSPIEL</span></h2>
-    <div class="sub">Anmelden</div>
+    <div class="login-tabs">
+      <button type="button" class="active" data-mode="login" id="loginTabLogin">Einloggen</button>
+      <button type="button" data-mode="register" id="loginTabRegister">Account erstellen</button>
+    </div>
     <div class="login-error" id="loginError" style="display:none;"></div>
     <div class="field">
       <label>Name</label>
       <input type="text" id="loginName" autocomplete="username">
     </div>
     <div class="field">
-      <label>Passwort</label>
+      <label>Merkwort</label>
       <input type="password" id="loginPassword" autocomplete="current-password">
     </div>
-    <div class="hint">Neuer Name? Passwort frei wählen — wird beim ersten Mal für dich angelegt.</div>
-    <button class="btn btn-primary" id="loginBtn" type="button">Los geht's</button>
+    <div class="hint" id="loginHint">Melde dich mit Namen und Merkwort an.</div>
+    <button class="btn btn-primary" id="loginBtn" type="button">Einloggen</button>
   </div>
 </div>
 

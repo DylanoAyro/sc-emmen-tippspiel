@@ -32,14 +32,16 @@ create table tips (
 );
 
 -- ============================================================
--- Tabelle: players (Phase 4: simples Name+Passwort-"Login")
+-- Tabelle: players (Phase 4: simples Name+Merkwort-"Login")
 -- ============================================================
--- Kein echtes Auth-System — Passwort liegt im Klartext und ist über den
--- anon key auslesbar (RLS unten ist offen). Reicht nur, um zu verhindern,
--- dass jemand versehentlich/mutwillig unter fremdem Namen tippt.
+-- Kein echtes Auth-System — "password" speichert einen clientseitig per
+-- Web Crypto (SHA-256) gehashten Wert, kein Klartext, aber auch kein Salt.
+-- Tabelle ist über den anon key auslesbar (RLS unten ist offen), reicht nur,
+-- um zu verhindern, dass jemand versehentlich/mutwillig unter fremdem
+-- Namen tippt — keine echte Absicherung.
 create table players (
   name       text primary key,
-  password   text not null
+  password   text not null  -- SHA-256-Hex-Hash, siehe app.js sha256Hex()
 );
 
 -- ============================================================
