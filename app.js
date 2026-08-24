@@ -46,34 +46,81 @@ function rowToTip(row){
   return { name: row.name, heim: row.heim, gast: row.gast, spezial: row.spezial || {}, submittedAt: row.submitted_at };
 }
 
-/* ---------- username ---------- */
-async function ensureUsername(){
-  let name = localStorage.getItem('tippspiel_username');
-  if(!name){
-    name = promptForName();
+/* ---------- login (name + password, kein echtes Auth-System) ---------- */
+async function checkPlayerLogin(name, password){
+  const { data, error } = await supabaseClient.from('players').select('*').eq('name', name).maybeSingle();
+  if(error) return { ok:false, error:'Verbindungsfehler, bitte nochmal versuchen' };
+  if(!data){
+    const { error: insErr } = await supabaseClient.from('players').insert({ name, password });
+    if(insErr) return { ok:false, error:'Registrierung fehlgeschlagen' };
+    return { ok:true };
   }
-  USERNAME = name;
-  $('#youName').textContent = USERNAME;
+  if(data.password !== password){
+    return { ok:false, error:'Falsches Passwort' };
+  }
+  return { ok:true };
 }
-function promptForName(){
-  let name = '';
-  while(!name){
-    name = window.prompt('Wie heisst du? (wird bei Tipps angezeigt)', '');
-    if(name === null){ name = 'Gast'; break; }
-    name = name.trim();
+
+function showLoginOverlay(){
+  $('#loginOverlay').classList.remove('hidden');
+  $('#loginName').focus();
+}
+function hideLoginOverlay(){
+  $('#loginOverlay').classList.add('hidden');
+}
+
+function completeLogin(name, password, persist){
+  USERNAME = name;
+  if(persist){
+    localStorage.setItem('tippspiel_username', name);
+    localStorage.setItem('tippspiel_password', password);
   }
-  localStorage.setItem('tippspiel_username', name);
-  return name;
+  $('#youName').textContent = USERNAME;
+  hideLoginOverlay();
+  renderAll();
+  setInterval(renderAll, 25000);
+}
+
+async function attemptLogin(){
+  const name = $('#loginName').value.trim();
+  const password = $('#loginPassword').value;
+  const errEl = $('#loginError');
+  errEl.style.display = 'none';
+  if(!name || !password){
+    errEl.textContent = 'Name und Passwort ausfüllen';
+    errEl.style.display = 'block';
+    return;
+  }
+  const result = await checkPlayerLogin(name, password);
+  if(!result.ok){
+    errEl.textContent = result.error;
+    errEl.style.display = 'block';
+    return;
+  }
+  completeLogin(name, password, true);
+}
+
+$('#loginBtn').addEventListener('click', attemptLogin);
+$('#loginPassword').addEventListener('keydown', e=>{ if(e.key === 'Enter') attemptLogin(); });
+$('#loginName').addEventListener('keydown', e=>{ if(e.key === 'Enter') $('#loginPassword').focus(); });
+
+async function ensureUsername(){
+  const savedName = localStorage.getItem('tippspiel_username');
+  const savedPassword = localStorage.getItem('tippspiel_password');
+  if(savedName && savedPassword){
+    const result = await checkPlayerLogin(savedName, savedPassword);
+    if(result.ok){
+      completeLogin(savedName, savedPassword, false);
+      return;
+    }
+  }
+  showLoginOverlay();
 }
 
 $('#changeNameBtn').addEventListener('click', ()=>{
-  const name = window.prompt('Neuer Name:', USERNAME || '');
-  if(name && name.trim()){
-    USERNAME = name.trim();
-    localStorage.setItem('tippspiel_username', USERNAME);
-    $('#youName').textContent = USERNAME;
-    renderAll();
-  }
+  localStorage.removeItem('tippspiel_username');
+  localStorage.removeItem('tippspiel_password');
+  location.reload();
 });
 
 /* ---------- matches: read/write ---------- */
@@ -442,8 +489,15 @@ function renderAdminMatchList(){
 }
 
 /* ---------- tabs ---------- */
+let adminUnlocked = false;
 $$('nav.tabs button').forEach(btn=>{
   btn.addEventListener('click', ()=>{
+    if(btn.dataset.tab === 'admin' && !adminUnlocked){
+      const pw = window.prompt('Admin-Passwort:');
+      if(pw === null) return;
+      if(pw !== ADMIN_PASSWORD){ showToast('Falsches Passwort'); return; }
+      adminUnlocked = true;
+    }
     $$('nav.tabs button').forEach(b=>b.classList.remove('active'));
     $$('section.tab').forEach(s=>s.classList.remove('active'));
     btn.classList.add('active');
@@ -459,8 +513,4 @@ async function renderAll(){
   renderAdminMatchList();
 }
 
-(async function init(){
-  await ensureUsername();
-  await renderAll();
-  setInterval(renderAll, 25000);
-})();
+ensureUsername();

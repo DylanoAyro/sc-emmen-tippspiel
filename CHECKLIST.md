@@ -49,20 +49,25 @@ Am besten Punkt für Punkt mit Claude Code abarbeiten, nicht alles auf einmal.
 
 ## Phase 3 — Deployment
 
-- [ ] Netlify- oder Vercel-Account erstellen (beide free für dieses Projekt)
-- [ ] Repo auf GitHub pushen (`git remote add origin ...`, `git push`)
-- [ ] Bei Netlify/Vercel: "New Site from Git" → Repo auswählen
-- [ ] Build-Settings: kein Build-Command nötig (statisches HTML), Publish-Directory
-      ist der Projekt-Root
-- [ ] Deploy auslösen, geniertes `*.netlify.app`-/`*.vercel.app`-URL testen
-- [ ] Optional: eigene Domain oder schönerer Subdomain-Name einstellen
+- [x] Netlify-Account erstellt (Login via GitHub)
+- [x] Repo auf GitHub gepusht (`DylanoAyro/sc-emmen-tippspiel`)
+- [x] Bei Netlify: "Import an existing project" → Repo ausgewählt
+- [x] Build-Settings: kein Build-Command nötig (statisches HTML), Publish-Directory
+      Projekt-Root
+- [x] Deploy ausgelöst, URL getestet (Playwright-Smoke-Test gegen Live-Seite:
+      Tippen/Speichern funktioniert fehlerfrei)
+- [x] Subdomain-Name eingestellt: **auratippspiel.netlify.app**
 
 ## Phase 4 — Absicherung (optional, aber empfohlen)
 
-- [ ] Entscheiden: reicht "Ehrensystem unter Kollegen" oder soll's einen simplen
-      Admin-Schutz geben?
-- [ ] Falls Schutz gewünscht: einfaches Passwort-Prompt fürs Admin-Tab (client-seitig,
-      kein echter Sicherheitsmechanismus, hält aber Zufalls-Klicker fern)
+- [x] Entschieden: simpler Schutz gewünscht, nicht nur Ehrensystem
+- [x] Admin-Tab-Passwort (client-seitig, `ADMIN_PASSWORD` in `config.js`) — kein
+      echter Sicherheitsmechanismus, hält aber Zufalls-Klicker fern
+- [x] Zusätzlich (über Checkliste hinaus): einfaches Name+Passwort-"Login" für alle
+      Tippenden via neuer `players`-Tabelle (Login-Overlay beim Start) — schützt
+      Namen davor, dass jemand anders versehentlich/mutwillig unter fremdem Namen
+      tippt. Passwörter liegen im Klartext in einer via RLS offen lesbaren Tabelle
+      (kein echtes Auth-System, gleiche Einschränkung wie beim Admin-Passwort)
 - [ ] Für "richtigen" Schutz später: Supabase Auth (Magic Link per E-Mail) einbauen,
       dann RLS-Policies auf eingeloggte User statt komplett offen umstellen — nicht
       nötig für den Start, nice-to-have später

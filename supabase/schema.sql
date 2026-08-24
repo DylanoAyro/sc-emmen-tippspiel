@@ -32,10 +32,22 @@ create table tips (
 );
 
 -- ============================================================
+-- Tabelle: players (Phase 4: simples Name+Passwort-"Login")
+-- ============================================================
+-- Kein echtes Auth-System — Passwort liegt im Klartext und ist über den
+-- anon key auslesbar (RLS unten ist offen). Reicht nur, um zu verhindern,
+-- dass jemand versehentlich/mutwillig unter fremdem Namen tippt.
+create table players (
+  name       text primary key,
+  password   text not null
+);
+
+-- ============================================================
 -- Row Level Security
 -- ============================================================
 alter table matches enable row level security;
 alter table tips    enable row level security;
+alter table players enable row level security;
 
 -- matches: anon darf alles (lesen, tippen ist kein Zugriff auf matches,
 -- aber Admin-Tab legt/ändert/löscht Spiele -> braucht select/insert/update/delete)
@@ -65,3 +77,11 @@ create policy "tips_update_anon" on tips
 
 create policy "tips_delete_anon" on tips
   for delete to anon using (true);
+
+-- players: anon darf lesen (für Login-Check) und neue Accounts anlegen;
+-- kein update/delete nötig, da Passwörter im Frontend nicht geändert werden
+create policy "players_select_anon" on players
+  for select to anon using (true);
+
+create policy "players_insert_anon" on players
+  for insert to anon with check (true);
