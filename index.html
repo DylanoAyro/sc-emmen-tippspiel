@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SC Emmen 3 – Tippspiel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #101112;
+    --bg-raised: #17191a;
+    --card: #1c1e1f;
+    --line: #33362f;
+    --chalk: #f2f1ec;
+    --chalk-dim: #b9b8b2;
+    --amber: #ffb627;
+    --amber-dim: #7a5f1c;
+    --red: #d5432f;
+    --green-ok: #6fbf73;
+    --radius: 10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #1a2620 0%, var(--bg) 55%);
+    color:var(--chalk);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 16px;}
+
+  /* Scoreboard header */
+  header.board{
+    background:linear-gradient(180deg,#1b1d1e 0%,#131415 100%);
+    border-bottom:3px solid var(--amber-dim);
+    padding:22px 0 16px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.board::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(180deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 4px);
+    pointer-events:none;
+  }
+  .board-inner{position:relative;z-index:1;}
+  .club-line{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  h1{
+    font-family:'Teko',sans-serif;
+    font-weight:600;
+    font-size:44px;
+    letter-spacing:1px;
+    margin:0;
+    line-height:1;
+    color:var(--chalk);
+  }
+  h1 .accent{color:var(--amber);}
+  .subtitle{
+    font-family:'Share Tech Mono',monospace;
+    font-size:12px;
+    color:var(--chalk-dim);
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+  .you-row{
+    margin-top:14px;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    font-family:'Share Tech Mono',monospace; font-size:13px; color:var(--chalk-dim);
+  }
+  .you-row button{
+    background:none;border:1px solid var(--line);color:var(--chalk-dim);
+    padding:4px 10px;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer;
+  }
+  .you-row button:hover{border-color:var(--amber-dim);color:var(--amber);}
+  .you-name{color:var(--amber);font-weight:700;}
+
+  /* Nav tabs */
+  nav.tabs{
+    display:flex; gap:0; margin-top:18px;
+    border-bottom:1px solid var(--line);
+  }
+  nav.tabs button{
+    flex:1;
+    background:none;border:none;
+    color:var(--chalk-dim);
+    font-family:'Teko',sans-serif; font-size:20px; letter-spacing:1px;
+    padding:10px 4px 12px;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    transition:color .15s, border-color .15s;
+  }
+  nav.tabs button.active{color:var(--amber); border-color:var(--amber);}
+  nav.tabs button:hover{color:var(--chalk);}
+
+  main{padding-top:20px;}
+  section.tab{display:none;}
+  section.tab.active{display:block;}
+
+  .empty{
+    text-align:center; padding:40px 16px; color:var(--chalk-dim);
+    font-family:'Share Tech Mono',monospace; font-size:13px;
+  }
+
+  /* Match ticket card */
+  .ticket{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:16px;
+    position:relative;
+    overflow:hidden;
+  }
+  .ticket-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 14px;
+    background:var(--bg-raised);
+    border-bottom:1px dashed var(--line);
+    font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--chalk-dim);
+    text-transform:uppercase; letter-spacing:1px;
+  }
+  .ticket-head .status-pill{
+    padding:2px 8px; border-radius:20px; font-size:10px;
+    border:1px solid var(--line);
+  }
+  .status-open{color:var(--green-ok); border-color:var(--green-ok);}
+  .status-locked{color:var(--amber); border-color:var(--amber-dim);}
+  .status-done{color:var(--chalk-dim);}
+
+  .ticket-body{padding:16px 14px;}
+  .match-title{
+    font-family:'Teko',sans-serif; font-size:26px; letter-spacing:0.5px;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .match-title .vs{color:var(--chalk-dim); font-size:18px;}
+  .badge{
+    font-family:'Share Tech Mono',monospace; font-size:10px;
+    padding:2px 6px; border-radius:4px; border:1px solid var(--amber-dim); color:var(--amber);
+    text-transform:uppercase;
+  }
+
+  .score-row{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    margin:16px 0 10px;
+  }
+  .score-box{
+    width:56px; height:64px;
+    background:#0b0c0c;
+    border:2px solid var(--amber-dim);
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Share Tech Mono',monospace;
+    font-size:30px; color:var(--amber);
+    text-shadow:0 0 8px rgba(255,182,39,0.5);
+  }
+  .score-box input{
+    width:100%; height:100%; background:transparent; border:none; outline:none;
+    color:var(--amber); font-family:inherit; font-size:inherit; text-align:center;
+  }
+  .score-sep{font-family:'Teko',sans-serif; font-size:30px; color:var(--chalk-dim);}
+  .final-tag{
+    text-align:center; font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--chalk-dim);
+    letter-spacing:1px; margin-top:-4px; margin-bottom:12px;
+  }
+
+  .specials{margin-top:6px;}
+  .special-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:8px 0; border-top:1px solid var(--line);
+    font-size:13px;
+  }
+  .special-row .q{color:var(--chalk-dim); flex:1;}
+  .special-row select, .special-row input[type=number], .special-row input[type=text]{
+    background:#0b0c0c; border:1px solid var(--line); color:var(--chalk);
+    border-radius:6px; padding:6px 8px; font-family:'Inter'; font-size:13px; width:110px;
+  }
+
+  .ticket-actions{
+    display:flex; justify-content:flex-end; gap:8px; margin-top:14px;
+  }
+  .btn{
+    font-family:'Teko',sans-serif; font-size:18px; letter-spacing:0.5px;
+    padding:7px 18px; border-radius:6px; cursor:pointer; border:none;
+  }
+  .btn-primary{background:var(--amber); color:#171400;}
+  .btn-primary:hover{background:#ffc357;}
+  .btn-ghost{background:none; border:1px solid var(--line); color:var(--chalk-dim);}
+  .btn-ghost:hover{color:var(--chalk); border-color:var(--chalk-dim);}
+  .btn-danger{background:none;border:1px solid var(--red); color:var(--red);}
+
+  .kickoff-line{
+    font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--chalk-dim);
+    text-align:center; margin-bottom:4px;
+  }
+
+  .your-tip-note{
+    text-align:center; font-family:'Share Tech Mono',monospace; font-size:11px;
+    color:var(--green-ok); margin-top:10px;
+  }
+
+  /* Reveal table (after lock) */
+  .reveal-table{width:100%; border-collapse:collapse; margin-top:10px; font-size:13px;}
+  .reveal-table th, .reveal-table td{
+    padding:6px 8px; border-bottom:1px solid var(--line); text-align:center;
+  }
+  .reveal-table th{color:var(--chalk-dim); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:1px;}
+  .reveal-table td.name{text-align:left; color:var(--chalk);}
+  .reveal-table td.pts{color:var(--amber); font-family:'Share Tech Mono',monospace;}
+
+  /* Leaderboard */
+  .board-table{width:100%; border-collapse:collapse;}
+  .board-table th{
+    font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--chalk-dim);
+    text-transform:uppercase; letter-spacing:1px; text-align:left; padding:8px; border-bottom:1px solid var(--line);
+  }
+  .board-table td{padding:10px 8px; border-bottom:1px solid var(--line);}
+  .rank{
+    font-family:'Teko',sans-serif; font-size:22px; width:34px; text-align:center; color:var(--chalk-dim);
+  }
+  .rank.gold{color:#ffd54a;}
+  .rank.silver{color:#d6d6d6;}
+  .rank.bronze{color:#cd8b52;}
+  .player-name{font-weight:600;}
+  .pts-total{
+    font-family:'Share Tech Mono',monospace; color:var(--amber); text-align:right; font-size:16px;
+  }
+
+  /* Admin */
+  .panel{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin-bottom:18px;
+  }
+  .panel h3{
+    font-family:'Teko',sans-serif; font-size:22px; margin:0 0 12px; letter-spacing:0.5px; color:var(--amber);
+  }
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12px; color:var(--chalk-dim); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;}
+  .field input[type=text], .field input[type=datetime-local], .field select, .field textarea, .field input[type=number]{
+    width:100%; background:#0b0c0c; border:1px solid var(--line); color:var(--chalk);
+    border-radius:6px; padding:9px 10px; font-family:'Inter'; font-size:14px;
+  }
+  .field textarea{resize:vertical; min-height:70px; font-family:'Share Tech Mono',monospace; font-size:12px;}
+  .hint{font-size:11px; color:var(--chalk-dim); margin-top:4px;}
+  .row2{display:flex; gap:10px;}
+  .row2 > div{flex:1;}
+
+  .admin-match-row{
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:10px 0; border-bottom:1px solid var(--line);
+  }
+  .admin-match-row:last-child{border-bottom:none;}
+  .admin-match-row .info{font-size:13px;}
+  .admin-match-row .info .op{font-weight:600;}
+  .admin-match-row .info .meta{color:var(--chalk-dim); font-size:11px; font-family:'Share Tech Mono',monospace;}
+
+  .toast{
+    position:fixed; bottom:18px; left:50%; transform:translateX(-50%);
+    background:var(--amber); color:#171400; padding:9px 18px; border-radius:8px;
+    font-family:'Teko',sans-serif; font-size:16px; letter-spacing:0.5px;
+    opacity:0; pointer-events:none; transition:opacity .2s;
+    z-index:50;
+  }
+  .toast.show{opacity:1;}
+
+  .result-form{
+    margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);
+  }
+
+  @media (max-width:420px){
+    h1{font-size:36px;}
+    .score-box{width:48px; height:56px; font-size:24px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="board">
+  <div class="wrap board-inner">
+    <div class="club-line">
+      <h1>SC EMMEN 3 <span class="accent">TIPPSPIEL</span></h1>
+    </div>
+    <div class="subtitle">5. Liga III &middot; Interne Tipprunde</div>
+    <div class="you-row">
+      <span>Angemeldet als:</span>
+      <span class="you-name" id="youName">–</span>
+      <button id="changeNameBtn" type="button">Name ändern</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabs">
+    <button class="active" data-tab="spiele">Spiele</button>
+    <button data-tab="rangliste">Rangliste</button>
+    <button data-tab="admin">Admin</button>
+  </nav>
+
+  <main>
+    <section class="tab active" id="tab-spiele">
+      <div id="matchesList"></div>
+    </section>
+
+    <section class="tab" id="tab-rangliste">
+      <div class="panel">
+        <h3>Rangliste</h3>
+        <table class="board-table">
+          <thead><tr><th></th><th>Spieler</th><th style="text-align:right">Punkte</th></tr></thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+        <div class="empty" id="leaderboardEmpty" style="display:none;">Noch keine ausgewerteten Spiele.</div>
+      </div>
+    </section>
+
+    <section class="tab" id="tab-admin">
+      <div class="panel">
+        <h3>Neues Spiel</h3>
+        <div class="field">
+          <label>Gegner</label>
+          <input type="text" id="newOpponent" placeholder="z.B. FC Reussbühl">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Heim / Auswärts</label>
+            <select id="newHomeAway">
+              <option value="heim">Heimspiel</option>
+              <option value="auswaerts">Auswärtsspiel</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Anpfiff</label>
+            <input type="datetime-local" id="newKickoff">
+          </div>
+        </div>
+        <div class="field">
+          <label>Extra-Fragen (optional, eine pro Zeile)</label>
+          <textarea id="newSpecials" placeholder="Erster Torschütze unser Team?|text&#10;Mehr als 3 Tore total?|janein"></textarea>
+          <div class="hint">Format: Frage | typ — typ ist "text" oder "janein"</div>
+        </div>
+        <div class="ticket-actions">
+          <button class="btn btn-primary" id="addMatchBtn" type="button">Spiel anlegen</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Spiele verwalten</h3>
+        <div id="adminMatchList"></div>
+        <div class="empty" id="adminEmpty" style="display:none;">Noch keine Spiele angelegt.</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
