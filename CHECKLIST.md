@@ -74,7 +74,13 @@ Am besten Punkt für Punkt mit Claude Code abarbeiten, nicht alles auf einmal.
 
 ## Phase 5 — Feinschliff
 
-- [ ] Spielplan für die aktuelle Saison eintragen (manuell, siehe README)
+- [x] Spielplan für die aktuelle Saison eingetragen (16 Meisterschaftsspiele,
+      25.08.2026 – 12.06.2027, per Skript direkt in Supabase eingespielt)
+  - [ ] 2 Spiele fehlt noch die Anpfiff-Zeit, nachtragen sobald bekannt:
+        Sa 17.04.2027 FC Eschenbach III – SC Emmen III,
+        Sa 01.05.2027 FC Gunzwil III – SC Emmen III
+  - (bewusst weggelassen: Di 11.08.2026 FC Eschenbach II — abgesagt/keine
+    Neuansetzung; So 23.08.2026 Cup-Spiel FC Rothenburg III — bereits gelaufen)
 - [ ] Testrunde mit 1-2 Kollegen machen, bevor der Link an alle geht
 - [ ] Link in der Team-Gruppe teilen 🎉
 
