@@ -80,10 +80,16 @@ create policy "tips_update_anon" on tips
 create policy "tips_delete_anon" on tips
   for delete to anon using (true);
 
--- players: anon darf lesen (für Login-Check) und neue Accounts anlegen;
--- kein update/delete nötig, da Passwörter im Frontend nicht geändert werden
+-- players: anon darf lesen (für Login-Check), neue Accounts anlegen,
+-- sowie bearbeiten/löschen (Admin-Tab -> Spieler verwalten)
 create policy "players_select_anon" on players
   for select to anon using (true);
 
 create policy "players_insert_anon" on players
   for insert to anon with check (true);
+
+create policy "players_update_anon" on players
+  for update to anon using (true) with check (true);
+
+create policy "players_delete_anon" on players
+  for delete to anon using (true);

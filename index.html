@@ -19,12 +19,12 @@
     --accent-700:#7d5411;
     --n-100:#f8f4f4;
     --n-200:#eae7e7;
-    --n-300:#d7d3d3;
-    --n-400:#bab6b6;
+    --n-300:#bcb6b6;
+    --n-400:#9c9696;
     --n-500:#9b9797;
     --n-600:#7d7979;
     --n-700:#605d5d;
-    --divider:color-mix(in srgb,#201f1d 16%,transparent);
+    --divider:color-mix(in srgb,#201f1d 32%,transparent);
 
     --font-h:"Cormorant Garamond",Georgia,serif;
     --font-b:"Lora",Georgia,serif;
@@ -353,7 +353,8 @@
   }
   .admin-match-row:first-child{border-top:1px solid var(--ink);}
   .admin-match-row:last-child{border-bottom:none;}
-  .admin-match-row .info{font-size:13px;min-width:0;flex:1;}
+  .admin-match-row .info{font-size:13px;min-width:0;flex:1 1 200px;}
+  .admin-match-row .row-actions{display:flex;gap:var(--s2);flex-wrap:wrap;justify-content:flex-end;}
   .admin-match-row .info .op{
     font-family:var(--font-h);font-weight:600;font-size:18px;line-height:1.3;color:var(--ink);
   }
@@ -548,6 +549,12 @@
         <h3>Spiele verwalten</h3>
         <div id="adminMatchList"></div>
         <div class="empty" id="adminEmpty" style="display:none;">Noch keine Spiele angelegt.</div>
+      </div>
+
+      <div class="panel">
+        <h3>Spieler verwalten</h3>
+        <div id="adminPlayerList"></div>
+        <div class="empty" id="adminPlayerEmpty" style="display:none;">Noch keine Spieler registriert.</div>
       </div>
     </section>
   </main>

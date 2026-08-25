@@ -179,6 +179,41 @@ async function deleteMatchRow(matchId){
   if(error){ console.error('deleteMatchRow failed', error); return false; }
   return true;
 }
+async function updateMatchFields(matchId, fields){
+  const { error } = await supabaseClient.from('matches').update({
+    opponent: fields.opponent,
+    home_away: fields.homeAway,
+    kickoff: fields.kickoff,
+    specials: fields.specials
+  }).eq('id', matchId);
+  if(error){ console.error('updateMatchFields failed', error); return false; }
+  return true;
+}
+
+/* ---------- players: read/write ---------- */
+async function loadPlayerNames(){
+  const { data, error } = await supabaseClient.from('players').select('name').order('name');
+  if(error){ console.error('loadPlayerNames failed', error); return []; }
+  return (data || []).map(r=>r.name);
+}
+async function updatePlayer(oldName, newName, newPassword){
+  const fields = {};
+  if(newName && newName !== oldName) fields.name = newName;
+  if(newPassword) fields.password = await sha256Hex(newPassword);
+  if(Object.keys(fields).length === 0) return true;
+  const { error } = await supabaseClient.from('players').update(fields).eq('name', oldName);
+  if(error){ console.error('updatePlayer failed', error); return false; }
+  if(fields.name){
+    const { error: tipsErr } = await supabaseClient.from('tips').update({ name: fields.name }).eq('name', oldName);
+    if(tipsErr) console.error('updatePlayer: renaming tips failed', tipsErr);
+  }
+  return true;
+}
+async function deletePlayerRow(name){
+  const { error } = await supabaseClient.from('players').delete().eq('name', name);
+  if(error){ console.error('deletePlayerRow failed', error); return false; }
+  return true;
+}
 
 /* ---------- tips: read/write ---------- */
 async function loadTipsForMatch(matchId){
@@ -376,6 +411,21 @@ async function renderMatches(){
 }
 
 function shorten(s){ return s.length > 16 ? s.slice(0,14)+'…' : s; }
+function toLocalInputValue(iso){
+  const d = new Date(iso);
+  const pad = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function parseSpecialsInput(text, existingSpecials){
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  return lines.map((line, idx)=>{
+    const [frage, typRaw] = line.split('|').map(s=>s && s.trim());
+    const typ = (typRaw === 'janein') ? 'janein' : 'text';
+    const existing = existingSpecials && existingSpecials[idx];
+    const id = existing ? existing.id : ('sp_' + Date.now() + '_' + idx);
+    return { id, frage: frage || line, typ };
+  });
+}
 function escapeHtml(s){
   return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -419,12 +469,7 @@ $('#addMatchBtn').addEventListener('click', async ()=>{
     showToast('Gegner und Anpfiff-Zeit ausfüllen');
     return;
   }
-  const specialsRaw = $('#newSpecials').value.split('\n').map(l=>l.trim()).filter(Boolean);
-  const specials = specialsRaw.map((line, idx)=>{
-    const [frage, typRaw] = line.split('|').map(s=>s && s.trim());
-    const typ = (typRaw === 'janein') ? 'janein' : 'text';
-    return { id: 'sp_' + Date.now() + '_' + idx, frage: frage || line, typ };
-  });
+  const specials = parseSpecialsInput($('#newSpecials').value);
   const match = {
     id: 'm_' + Date.now(),
     opponent, homeAway,
@@ -460,13 +505,58 @@ function renderAdminMatchList(){
         <div class="op">${label}${doneTag}</div>
         <div class="meta">${fmtDate(m.kickoff)}</div>
       </div>
-      <div>
+      <div class="row-actions">
+        <button class="btn btn-ghost" data-action="edit-match" data-match="${m.id}">Bearbeiten</button>
         ${m.status !== 'beendet' ? `<button class="btn btn-ghost" data-action="enter-result" data-match="${m.id}">Resultat erfassen</button>` : ''}
         <button class="btn btn-danger" data-action="delete-match" data-match="${m.id}">Löschen</button>
       </div>
+      <div class="result-form" id="editForm-${m.id}" style="display:none; width:100%;"></div>
       <div class="result-form" id="resultForm-${m.id}" style="display:none; width:100%;"></div>
     </div>`;
   }).join('');
+
+  $$('[data-action="edit-match"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const matchId = btn.dataset.match;
+      const m = MATCHES.find(x=>x.id === matchId);
+      const formDiv = $(`#editForm-${matchId}`);
+      if(formDiv.style.display === 'block'){ formDiv.style.display = 'none'; return; }
+      const specialsText = (m.specials||[]).map(sp=>`${sp.frage}|${sp.typ}`).join('\n');
+      formDiv.innerHTML = `
+        <div class="field"><label>Gegner</label><input type="text" id="edit-opponent-${matchId}" value="${escapeHtml(m.opponent)}"></div>
+        <div class="row2">
+          <div class="field">
+            <label>Heim / Auswärts</label>
+            <select id="edit-homeaway-${matchId}">
+              <option value="heim" ${m.homeAway==='heim'?'selected':''}>Heimspiel</option>
+              <option value="auswaerts" ${m.homeAway==='auswaerts'?'selected':''}>Auswärtsspiel</option>
+            </select>
+          </div>
+          <div class="field"><label>Anpfiff</label><input type="datetime-local" id="edit-kickoff-${matchId}" value="${toLocalInputValue(m.kickoff)}"></div>
+        </div>
+        <div class="field">
+          <label>Extra-Fragen (eine pro Zeile)</label>
+          <textarea id="edit-specials-${matchId}">${escapeHtml(specialsText)}</textarea>
+          <div class="hint">Format: Frage, senkrechter Strich, dann „text" oder „janein". Reihenfolge nicht ändern, sonst verlieren bereits abgegebene Antworten ihre Zuordnung.</div>
+        </div>
+        <div class="ticket-actions"><button class="btn btn-primary" data-action="save-match-edit" data-match="${matchId}">Änderungen speichern</button></div>`;
+      formDiv.style.display = 'block';
+
+      formDiv.querySelector('[data-action="save-match-edit"]').addEventListener('click', async ()=>{
+        const opponent = $(`#edit-opponent-${matchId}`).value.trim();
+        const homeAway = $(`#edit-homeaway-${matchId}`).value;
+        const kickoffVal = $(`#edit-kickoff-${matchId}`).value;
+        if(!opponent || !kickoffVal){ showToast('Gegner und Anpfiff-Zeit ausfüllen'); return; }
+        const specials = parseSpecialsInput($(`#edit-specials-${matchId}`).value, m.specials);
+        const ok = await updateMatchFields(matchId, {
+          opponent, homeAway, kickoff: new Date(kickoffVal).toISOString(), specials
+        });
+        if(!ok){ showToast('Speichern fehlgeschlagen'); return; }
+        showToast('Spiel aktualisiert');
+        renderAll();
+      });
+    });
+  });
 
   $$('[data-action="enter-result"]').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -518,6 +608,64 @@ function renderAdminMatchList(){
   });
 }
 
+async function renderAdminPlayerList(){
+  const container = $('#adminPlayerList');
+  const empty = $('#adminPlayerEmpty');
+  const players = await loadPlayerNames();
+  if(players.length === 0){
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  container.innerHTML = players.map(name=>`
+    <div class="admin-match-row" data-player="${escapeHtml(name)}">
+      <div class="info"><div class="op">${escapeHtml(name)}</div></div>
+      <div class="row-actions">
+        <button class="btn btn-ghost" data-action="edit-player">Bearbeiten</button>
+        <button class="btn btn-danger" data-action="delete-player">Löschen</button>
+      </div>
+      <div class="result-form" style="display:none; width:100%;"></div>
+    </div>`).join('');
+
+  $$('#adminPlayerList [data-action="edit-player"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const row = btn.closest('.admin-match-row');
+      const name = row.dataset.player;
+      const formDiv = row.querySelector('.result-form');
+      if(formDiv.style.display === 'block'){ formDiv.style.display = 'none'; return; }
+      formDiv.innerHTML = `
+        <div class="field"><label>Name</label><input type="text" class="edit-player-name" value="${escapeHtml(name)}"></div>
+        <div class="field"><label>Neues Merkwort (leer lassen zum Beibehalten)</label><input type="password" class="edit-player-password" autocomplete="new-password"></div>
+        <div class="hint">Umbenennen ändert auch den Namen bei bereits abgegebenen Tipps mit.</div>
+        <div class="ticket-actions"><button class="btn btn-primary" data-action="save-player-edit">Speichern</button></div>`;
+      formDiv.style.display = 'block';
+
+      formDiv.querySelector('[data-action="save-player-edit"]').addEventListener('click', async ()=>{
+        const newName = formDiv.querySelector('.edit-player-name').value.trim();
+        const newPassword = formDiv.querySelector('.edit-player-password').value;
+        if(!newName){ showToast('Name darf nicht leer sein'); return; }
+        const ok = await updatePlayer(name, newName, newPassword || null);
+        if(!ok){ showToast('Speichern fehlgeschlagen'); return; }
+        showToast('Spieler aktualisiert');
+        renderAll();
+      });
+    });
+  });
+
+  $$('#adminPlayerList [data-action="delete-player"]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const row = btn.closest('.admin-match-row');
+      const name = row.dataset.player;
+      if(!confirm(`Spieler "${name}" wirklich löschen? Der Login-Zugang wird entfernt, bereits abgegebene Tipps bleiben unter diesem Namen erhalten.`)) return;
+      const ok = await deletePlayerRow(name);
+      if(!ok){ showToast('Löschen fehlgeschlagen'); return; }
+      showToast('Spieler gelöscht');
+      renderAll();
+    });
+  });
+}
+
 /* ---------- tabs ---------- */
 let adminUnlocked = false;
 $$('nav.tabs button').forEach(btn=>{
@@ -541,6 +689,7 @@ async function renderAll(){
   await renderMatches();
   await renderLeaderboard();
   renderAdminMatchList();
+  renderAdminPlayerList();
 }
 
 ensureUsername();
