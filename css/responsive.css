@@ -1,0 +1,17 @@
+/* ---------- Mobile ---------- */
+@media (max-width:480px){
+  .wrap{padding:0 16px;}
+  h1{font-size:36px;}
+  .match-title{font-size:23px;}
+  .score-box{width:70px;height:78px;font-size:38px;}
+  .special-row{flex-wrap:wrap;}
+  .special-row select,
+  .special-row input[type=text],
+  .special-row input[type=number]{width:100%;}
+  .panel{padding:var(--s4) var(--s3);}
+  .admin-match-row .btn{flex:1;min-width:0;}
+  .reveal-table{font-size:12.5px;}
+  .reveal-table th,.reveal-table td{padding:var(--s2) 5px;}
+  .reveal-table td.name{font-size:16px;}
+  nav.tabs button{font-size:16px;}
+}

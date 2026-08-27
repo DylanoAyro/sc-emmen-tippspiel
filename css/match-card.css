@@ -1,0 +1,127 @@
+/* ---------- Match card ---------- */
+.ticket{
+  border:1px solid var(--n-300);
+  border-radius:var(--radius);
+  margin-bottom:var(--s4);
+  overflow:hidden;
+  background:transparent;
+}
+.ticket:first-child{border-top:2px solid var(--accent);}
+.ticket-head{
+  display:flex;justify-content:space-between;align-items:center;gap:var(--s3);
+  padding:var(--s2) var(--s4);
+  border-bottom:1px solid var(--divider);
+  font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--n-600);
+}
+.ticket-head .status-pill{
+  padding:2px 0;border:none;border-radius:0;
+  font-size:9.5px;letter-spacing:.16em;white-space:nowrap;
+}
+.status-open{color:var(--accent-700);}
+.status-open::before{content:"— ";}
+.status-locked{color:var(--n-700);}
+.status-locked::before{content:"— ";}
+.status-done{color:var(--n-500);}
+.status-done::before{content:"— ";}
+
+.ticket-body{padding:var(--s4);}
+.kickoff-line{
+  font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--n-600);
+  text-align:center;margin-bottom:var(--s2);
+}
+.match-title{
+  font-family:var(--font-h);font-weight:500;font-size:27px;line-height:1.2;
+  display:flex;align-items:baseline;justify-content:center;gap:var(--s2);
+  flex-wrap:wrap;text-align:center;
+}
+.match-title .vs{
+  font-size:15px;font-style:italic;font-weight:400;color:var(--n-600);
+}
+.badge{
+  font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  padding:2px 7px;border:1px solid var(--accent);border-radius:var(--radius);
+  color:var(--accent-700);
+}
+
+/* score boxes */
+.score-row{
+  display:flex;align-items:center;justify-content:center;gap:var(--s3);
+  margin:var(--s6) 0 var(--s2);
+}
+.score-box{
+  width:78px;height:86px;
+  background:var(--n-100);
+  border:1px solid var(--n-300);
+  border-radius:var(--radius);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-h);font-weight:400;font-size:44px;
+  font-variant-numeric:lining-nums tabular-nums;font-feature-settings:'tnum','lnum';
+  color:var(--ink);
+  transition:border-color .15s;
+}
+.score-box:focus-within{border-color:var(--accent);}
+.score-box input{
+  width:100%;height:100%;background:transparent;border:none;outline:none;
+  color:inherit;font-family:inherit;font-size:inherit;font-weight:inherit;
+  font-variant-numeric:lining-nums tabular-nums;text-align:center;
+  -moz-appearance:textfield;appearance:textfield;
+}
+.score-box input::-webkit-outer-spin-button,
+.score-box input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.score-sep{
+  font-family:var(--font-h);font-weight:300;font-size:34px;color:var(--accent);
+}
+.final-tag{
+  text-align:center;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--n-600);margin-top:0;margin-bottom:var(--s4);
+}
+
+/* extra questions */
+.specials{margin-top:var(--s4);}
+.special-row{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s3);
+  padding:var(--s3) 0;border-top:1px solid var(--divider);
+  font-size:14px;
+}
+.special-row .q{color:var(--ink);flex:1;min-width:0;line-height:1.4;}
+.special-row select,
+.special-row input[type=number],
+.special-row input[type=text]{
+  background:transparent;border:1px solid var(--n-300);color:var(--ink);
+  border-radius:var(--radius);padding:9px 10px;
+  font-family:var(--font-b);font-size:13.5px;width:132px;flex:none;
+  transition:border-color .15s;
+}
+.special-row select:hover,
+.special-row input:hover{border-color:var(--n-400);}
+.special-row select:focus,
+.special-row input:focus{border-color:var(--accent);outline:none;}
+
+.ticket-actions{
+  display:flex;justify-content:flex-end;gap:var(--s2);margin-top:var(--s4);
+}
+
+.your-tip-note{
+  text-align:center;font-size:12px;font-style:italic;
+  color:var(--n-600);margin-top:var(--s3);
+}
+
+/* reveal table after lock */
+.reveal-table{
+  width:100%;border-collapse:collapse;margin-top:var(--s4);font-size:13.5px;
+}
+.reveal-table th,.reveal-table td{
+  padding:var(--s2);border-bottom:1px solid var(--divider);text-align:center;
+}
+.reveal-table thead th{
+  border-bottom:1px solid var(--ink);
+  color:var(--n-600);font-family:var(--font-b);font-weight:400;
+  font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+}
+.reveal-table td{font-variant-numeric:lining-nums tabular-nums;}
+.reveal-table td.name{
+  text-align:left;font-family:var(--font-h);font-weight:600;font-size:18px;color:var(--ink);
+}
+.reveal-table td.pts{
+  font-family:var(--font-h);font-weight:600;font-size:18px;color:var(--accent-700);
+}

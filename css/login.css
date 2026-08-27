@@ -1,0 +1,40 @@
+/* ---------- Login ---------- */
+.login-overlay{
+  position:fixed;inset:0;z-index:100;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  padding:var(--s4);
+}
+.login-overlay.hidden{display:none;}
+.login-box{width:100%;max-width:360px;}
+.login-mark{display:block;margin:0 auto var(--s3);}
+.login-box h2{
+  font-family:var(--font-h);font-weight:400;font-size:40px;line-height:1.02;
+  margin:0;text-align:center;color:var(--ink);
+}
+.login-box h2 .accent{color:var(--ink);font-style:italic;display:block;}
+.login-box .sub{
+  text-align:center;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--n-600);margin-bottom:var(--s4);
+}
+.login-rule{width:44px;height:1px;background:var(--accent);margin:var(--s4) auto;}
+.login-error{
+  color:var(--red);font-size:13px;margin-bottom:var(--s3);text-align:center;font-style:italic;
+}
+.login-box .btn{width:100%;margin-top:var(--s1);font-size:19px;padding:12px 20px;}
+.login-tabs{
+  display:flex;gap:0;margin-bottom:var(--s6);
+  border-bottom:1px solid var(--divider);
+}
+.login-tabs button{
+  flex:1;background:none;border:none;color:var(--n-600);
+  font-family:var(--font-h);font-weight:600;font-size:17px;
+  padding:var(--s2) var(--s1) var(--s3);cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color .15s,border-color .15s;
+}
+.login-tabs button.active{color:var(--accent-700);border-color:var(--accent);}
+.login-tabs button:hover:not(.active){color:var(--ink);}
+.login-foot{
+  margin-top:var(--s4);text-align:center;font-size:11.5px;font-style:italic;color:var(--n-500);
+}

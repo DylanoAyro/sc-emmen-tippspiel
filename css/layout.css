@@ -1,0 +1,68 @@
+/* ---------- Masthead ---------- */
+header.board{
+  padding:var(--s6) 0 var(--s4);
+  border-bottom:1px solid var(--ink);
+}
+.club-line{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s4);flex-wrap:wrap;}
+h1{
+  font-family:var(--font-h);
+  font-weight:400;
+  font-size:46px;
+  line-height:1;
+  letter-spacing:.005em;
+  margin:0;
+  color:var(--ink);
+}
+h1 .accent{color:var(--ink);font-style:italic;}
+.subtitle{
+  font-size:9.5px;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--n-600);
+  margin-top:var(--s2);
+}
+.you-row{
+  margin-top:var(--s3);
+  display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;
+  font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--n-600);
+}
+.you-name{
+  font-family:var(--font-h);font-weight:600;font-size:16px;
+  letter-spacing:0;text-transform:none;color:var(--ink);
+}
+.you-row button{
+  background:none;border:1px solid var(--n-400);color:var(--n-700);
+  padding:5px 11px;border-radius:var(--radius);
+  font-family:var(--font-h);font-weight:600;font-size:13px;letter-spacing:0;text-transform:none;
+  cursor:pointer;transition:border-color .15s,color .15s;
+}
+.you-row button:hover{border-color:var(--ink);color:var(--ink);}
+
+/* ---------- Tabs ---------- */
+nav.tabs{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--divider);
+  position:sticky;top:0;z-index:20;
+  background:var(--bg);
+}
+nav.tabs button{
+  flex:1;
+  background:none;border:none;
+  color:var(--n-600);
+  font-family:var(--font-h);font-weight:600;font-size:18px;letter-spacing:.01em;
+  padding:var(--s3) var(--s1) var(--s3);
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color .15s,border-color .15s;
+}
+nav.tabs button.active{color:var(--accent-700);border-color:var(--accent);}
+nav.tabs button:hover:not(.active){color:var(--ink);}
+
+main{padding-top:var(--s6);}
+section.tab{display:none;}
+section.tab.active{display:block;}
+
+.empty{
+  text-align:center;padding:var(--s8) var(--s4);color:var(--n-600);
+  font-size:13.5px;font-style:italic;
+}

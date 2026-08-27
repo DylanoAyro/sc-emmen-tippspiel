@@ -1,0 +1,16 @@
+/* buttons — outlined, never filled */
+.btn{
+  font-family:var(--font-h);font-weight:600;font-size:17px;letter-spacing:.01em;
+  white-space:nowrap;
+  padding:9px 20px;border-radius:var(--radius);cursor:pointer;
+  background:transparent;border:1px solid var(--n-400);color:var(--n-700);
+  transition:background .15s,border-color .15s,color .15s;
+}
+.btn-primary{border-color:var(--accent);color:var(--accent-700);}
+.btn-primary:hover{background:var(--accent-100);}
+.btn-primary:active{background:var(--accent-200);}
+.btn-ghost{border-color:var(--n-400);color:var(--n-700);}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink);}
+.btn-danger{border-color:var(--red);color:var(--red);}
+.btn-danger:hover{background:color-mix(in srgb,var(--red) 8%,transparent);}
+.btn:disabled{opacity:.45;cursor:not-allowed;}

@@ -1,0 +1,33 @@
+:root{
+  /* Classical tokens */
+  --bg:#f3f2f2;
+  --surface:#eae9e9;
+  --ink:#201f1d;
+  --accent:#b68235;
+  --accent-100:#fff3e4;
+  --accent-200:#ffe3bf;
+  --accent-700:#7d5411;
+  --n-100:#f8f4f4;
+  --n-200:#eae7e7;
+  --n-300:#bcb6b6;
+  --n-400:#9c9696;
+  --n-500:#9b9797;
+  --n-600:#7d7979;
+  --n-700:#605d5d;
+  --divider:color-mix(in srgb,#201f1d 32%,transparent);
+
+  --font-h:"Cormorant Garamond",Georgia,serif;
+  --font-b:"Lora",Georgia,serif;
+
+  --s1:4.6px; --s2:9.2px; --s3:13.8px; --s4:18.4px; --s6:27.6px; --s8:36.8px;
+  --radius:4px;
+  --shadow-md:0 3px 10px color-mix(in srgb,#2d2b2b 16%,transparent);
+
+  /* legacy aliases — app.js referenziert var(--green-ok) inline */
+  --green-ok:#5c7150;
+  --red:#8c3a2a;
+  --line:var(--n-300);
+  --chalk:var(--ink);
+  --chalk-dim:var(--n-600);
+  --amber:var(--accent);
+}
