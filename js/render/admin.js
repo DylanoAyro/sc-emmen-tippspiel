@@ -53,7 +53,7 @@ export function renderAdminMatchList(){
       </div>
       <div class="row-actions">
         <button class="btn btn-ghost" data-action="edit-match" data-match="${m.id}">Bearbeiten</button>
-        ${m.status !== 'beendet' ? `<button class="btn btn-ghost" data-action="enter-result" data-match="${m.id}">Resultat erfassen</button>` : ''}
+        <button class="btn btn-ghost" data-action="enter-result" data-match="${m.id}">${m.status === 'beendet' ? 'Resultat korrigieren' : 'Resultat erfassen'}</button>
         <button class="btn btn-danger" data-action="delete-match" data-match="${m.id}">Löschen</button>
       </div>
       <div class="result-form" id="editForm-${m.id}" style="display:none; width:100%;"></div>
@@ -110,17 +110,28 @@ export function renderAdminMatchList(){
       const m = STATE.matches.find(x=>x.id === matchId);
       const formDiv = $(`#resultForm-${matchId}`);
       if(formDiv.style.display === 'block'){ formDiv.style.display = 'none'; return; }
-      let html = `<div class="row2" style="margin-top:10px;">
-        <div class="field"><label>Tore Heim</label><input type="number" min="0" id="res-heim-${matchId}"></div>
-        <div class="field"><label>Tore Gast</label><input type="number" min="0" id="res-gast-${matchId}"></div>
+      const prefillH = m.ergebnis ? m.ergebnis.heim : '';
+      const prefillG = m.ergebnis ? m.ergebnis.gast : '';
+      let html = '';
+      if(m.status === 'beendet'){
+        html += `<div class="hint">Spiel ist bereits ausgewertet — Speichern überschreibt das bisherige Resultat und die Extra-Fragen-Antworten.</div>`;
+      }
+      html += `<div class="row2" style="margin-top:10px;">
+        <div class="field"><label>Tore Heim</label><input type="number" min="0" id="res-heim-${matchId}" value="${prefillH}"></div>
+        <div class="field"><label>Tore Gast</label><input type="number" min="0" id="res-gast-${matchId}" value="${prefillG}"></div>
       </div>`;
       (m.specials||[]).forEach(sp=>{
+        const prefillSp = m.specialAntworten ? (m.specialAntworten[sp.id] ?? '') : '';
         if(sp.typ === 'janein'){
           html += `<div class="field"><label>${escapeHtml(sp.frage)}</label>
-            <select id="res-sp-${sp.id}"><option value="">–</option><option value="ja">Ja</option><option value="nein">Nein</option></select></div>`;
+            <select id="res-sp-${sp.id}">
+              <option value="">–</option>
+              <option value="ja" ${prefillSp==='ja'?'selected':''}>Ja</option>
+              <option value="nein" ${prefillSp==='nein'?'selected':''}>Nein</option>
+            </select></div>`;
         } else {
           html += `<div class="field"><label>${escapeHtml(sp.frage)} (richtige Antwort)</label>
-            <input type="text" id="res-sp-${sp.id}"></div>`;
+            <input type="text" id="res-sp-${sp.id}" value="${escapeHtml(prefillSp)}"></div>`;
         }
       });
       html += `<div class="ticket-actions"><button class="btn btn-primary" data-action="save-result" data-match="${matchId}">Speichern & auswerten</button></div>`;
