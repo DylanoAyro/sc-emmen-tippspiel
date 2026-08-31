@@ -1,9 +1,26 @@
 import { $, escapeHtml } from '../dom.js';
 import { STATE } from '../state.js';
 import { loadTipsForMatch } from '../api/tips.js';
-import { computePoints } from '../scoring.js';
+import { computePoints, POINTS } from '../scoring.js';
+
+const POINTS_KEY_LABELS = [
+  ['sieger', 'richtiger Sieger / richtiges Unentschieden'],
+  ['differenz', 'richtige Tordifferenz'],
+  ['heimtore', 'richtige Heimtore'],
+  ['gasttore', 'richtige Auswärtstore'],
+  ['extra', 'pro richtige Extra-Frage']
+];
+
+function renderPointsKey(){
+  const list = $('#pointsKeyList');
+  if(!list) return;
+  list.innerHTML = POINTS_KEY_LABELS.map(([key, label])=>
+    `<li><b>${POINTS[key]}</b><span>${escapeHtml(label)}</span></li>`
+  ).join('');
+}
 
 export async function renderLeaderboard(){
+  renderPointsKey();
   const totals = {};
   const finished = STATE.matches.filter(m=>m.status === 'beendet');
   for(const m of finished){

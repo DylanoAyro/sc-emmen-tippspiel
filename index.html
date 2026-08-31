@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="css/match-card.css">
 <link rel="stylesheet" href="css/buttons.css">
 <link rel="stylesheet" href="css/leaderboard.css">
+<link rel="stylesheet" href="css/badges.css">
 <link rel="stylesheet" href="css/admin.css">
 <link rel="stylesheet" href="css/toast.css">
 <link rel="stylesheet" href="css/login.css">
@@ -85,12 +86,14 @@
         <div class="empty" id="leaderboardEmpty" style="display:none;">Noch keine ausgewerteten Spiele.</div>
         <div class="points-key">
           <div class="kh">So gibt's Punkte</div>
-          <ul>
-            <li><b>5</b><span>exaktes Resultat</span></li>
-            <li><b>2</b><span>richtige Tendenz</span></li>
-            <li><b>3</b><span>pro richtige Extra-Frage</span></li>
-          </ul>
+          <ul id="pointsKeyList"></ul>
         </div>
+      </div>
+
+      <div class="panel">
+        <h3>Abzeichen</h3>
+        <div id="badgesList" class="badges-list"></div>
+        <div class="empty" id="badgesEmpty" style="display:none;">Noch keine Abzeichen vergeben.</div>
       </div>
     </section>
 

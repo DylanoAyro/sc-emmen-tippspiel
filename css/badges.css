@@ -1,0 +1,15 @@
+/* ---------- Abzeichen ---------- */
+.badges-list{display:flex;flex-direction:column;}
+.badge-card{
+  display:flex;gap:var(--s3);align-items:flex-start;
+  padding:var(--s3) 0;border-top:1px solid var(--divider);
+}
+.badge-card:first-child{border-top:none;padding-top:0;}
+.badge-icon{font-size:28px;line-height:1.15;flex:none;}
+.badge-body{min-width:0;}
+.badge-name{
+  font-family:var(--font-h);font-weight:600;font-size:18px;color:var(--ink);
+}
+.badge-desc{font-size:12px;color:var(--n-600);margin-top:2px;line-height:1.4;}
+.badge-holders{margin-top:var(--s2);font-size:13.5px;color:var(--n-700);}
+.badge-holders b{font-family:var(--font-h);font-weight:600;color:var(--accent-700);}
